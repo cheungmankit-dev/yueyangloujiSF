@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>救恩書院中文科《岳陽樓記》自學網站</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-light: #666666;
+            --accent-color: #b30000;
+        }
+        body { font-family: "PingFang HK", "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; margin: 0; padding: 0; }
+        header { background-color: var(--primary-color); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 20px 40px 20px; }
+        .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
+        .tab-btn { background-color: #e0e0e0; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .tab-btn:hover { background-color: #cccccc; }
+        .tab-btn.active { background-color: var(--primary-color); color: white; }
+        .tab-content { display: none; background-color: var(--card-bg); padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .tab-content.active { display: block; }
+        
+        .section-title { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 20px; font-size: 24px; font-weight: bold; display: block;}
+        
+        .para-selector { margin-bottom: 15px; display: flex; gap: 10px; align-items: center;}
+        .para-selector select { padding: 8px; font-size: 16px; flex-grow: 1; border-radius: 4px; }
+
+        .read-container { display: flex; gap: 20px; margin-bottom: 20px; }
+        .left-col, .right-col { flex: 1; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; }
+        .col-title { font-weight: bold; color: var(--primary-color); border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; font-size: 16px; }
+        .text-box, .translation-box { font-size: 18px; line-height: 2.2; }
+        .translation-box { color: var(--text-light); }
+        .sent-block { transition: background-color 0.2s ease; border-radius: 4px; padding: 2px 4px; display: inline; cursor: pointer; }
+        .sent-block.highlight { background-color: #fff3cd; color: #000; }
+        .sent-block.locked-highlight { background-color: #e6f2ff; box-shadow: inset 0 0 0 2px var(--primary-color); color: #000; }
+        .word { color: var(--primary-color); font-weight: bold; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; padding: 0 2px; }
+        .note-panel { position: sticky; bottom: 20px; background-color: #fff9e6; border: 2px solid #ffcc00; padding: 15px; border-radius: 8px; font-size: 18px; min-height: 60px; z-index: 100;}
+        
+        .student-form { background: #f8f9fa; padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 25px; display: flex; gap: 15px; flex-wrap: wrap;}
+        .student-form input { padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; flex: 1; min-width: 150px;}
+        
+        .quiz-question { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px dashed #ccc; }
+        .quiz-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+        .quiz-option { display: block; margin: 8px 0; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; background: #fafafa;}
+        .quiz-option.correct { background-color: #d4edda; border-color: #c3e6cb; color: #155724; font-weight: bold;}
+        .quiz-option.wrong { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .quiz-feedback { margin-top: 8px; font-size: 14px; font-weight: bold; display: none; }
+        
+        .btn-submit { background-color: var(--primary-color); color: white; border: none; padding: 12px 25px; font-size: 18px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;}
+        .btn-retry { background-color: #28a745; margin-top: 15px; }
+        #quiz-result-banner { margin-top: 20px; padding: 20px; border-radius: 5px; text-align: center; font-size: 20px; font-weight: bold; display: none; }
+        .result-pass { background-color: #d4edda; color: #155724; }
+        .result-fail { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>📚 救恩書院中文科《岳陽樓記》自學網站</h1>
+</header>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('tab-read')">第一部分：課文互動對讀</button>
+        <button class="tab-btn" onclick="switchTab('tab-quiz')">第二部分：自學檢測站</button>
+    </div>
+
+    <div id="tab-read" class="tab-content active">
+        <span class="section-title">一、 課文互動對讀</span>
+        <div class="para-selector">
+            <select id="paraSelect" onchange="changePara()">
+                <option value="1">第一段：交代寫作緣由</option>
+                <option value="2">第二段：概述岳陽樓勝狀</option>
+                <option value="3">第三段：雨景（寫覽物而悲）</option>
+                <option value="4">第四段：晴景（寫覽物而喜）</option>
+                <option value="5">第五段：合（抒發感受與心志）</option>
+            </select>
+        </div>
+        
+        <p style="font-size:14px; color:#555;">💡 提示：點擊句子可鎖定高亮對讀，點擊藍色字詞可看注釋。</p>
+
+        <div class="read-container">
+            <div class="left-col">
+                <div class="col-title">📜 文言原文</div>
+                <div id="text-container" class="text-box"></div>
+            </div>
+            <div class="right-col">
+                <div class="col-title">✍️ 白話語譯</div>
+                <div id="trans-container" class="translation-box"></div>
+            </div>
+        </div>
+
+        <div class="note-panel" id="notePanel">
+            <div id="noteContent">請點擊上方課文中的<span class="word">藍色底線字詞</span>查看注釋！</div>
+        </div>
+    </div>
+
+    <div id="tab-quiz" class="tab-content">
+        <span class="section-title">二、 自學檢測站</span>
+        <div class="student-form">
+            <input type="text" id="stu-name" placeholder="姓名 (例: Chan Tai Man)">
+            <input type="text" id="stu-class" placeholder="班別 (例: 4A)">
+            <input type="number" id="stu-num" placeholder="學號 (例: 01)">
+        </div>
+        <div id="quiz-form"></div>
+        <button id="btn-submit-quiz" class="btn-submit" onclick="gradeQuiz()">提交答案</button>
+        <button id="btn-retry-quiz" class="btn-submit btn-retry" onclick="generateQuiz()" style="display:none;">重新挑戰</button>
+        <div id="quiz-result-banner" class="result-pass"></div>
+    </div>
+</div>
+
+<script>
+    const dict = {
+        1: { word: "慶曆四年", note: "即公元1044年。慶曆：宋仁宗年號。當時正值慶曆新政。" },
+        2: { word: "滕子京", note: "名宗諒，字子京。" },
+        3: { word: "謫 / 守 / 巴陵郡", note: "謫︰貶謫、貶官。守︰指擔任太守。巴陵郡：即岳州，今岳陽市。" },
+        4: { word: "越明年", note: "及至第二年。越︰及至、到。" },
+        5: { word: "政通人和", note: "政事通達，人民和樂。" },
+        6: { word: "具", note: "通「俱」，全部。" },
+        7: { word: "唐賢 / 今人", note: "唐賢：唐代先賢。今人：當世名人。" },
+        8: { word: "屬", note: "通「囑」，囑咐。" },
+        9: { word: "勝狀", note: "美景。勝︰美。狀︰狀貌。" },
+        10: { word: "銜遠山", note: "像張開口含着君山。銜：即「啣」。" },
+        11: { word: "湯湯", note: "形容水勢浩瀚。粵[商]soeng1；普shāng。" },
+        12: { word: "大觀", note: "盛大壯觀的景象。" },
+        13: { word: "備", note: "完備、詳盡。" },
+        14: { word: "巫峽", note: "長江三峽之一。" },
+        15: { word: "瀟湘", note: "瀟水和湘水。" },
+        16: { word: "遷客騷人", note: "貶謫流放的官吏和失意的文人雅士。" },
+        17: { word: "霪雨 / 開", note: "霪雨︰久雨。開：放晴。" },
+        18: { word: "陰 / 怒號", note: "陰：陰冷。號︰呼嘯。粵[豪]hou4；普háo。" },
+        19: { word: "排空", note: "指浪濤洶湧，直上雲霄。" },
+        20: { word: "檣傾楫摧", note: "船隻翻覆。檣︰桅杆。楫︰船槳。" },
+        21: { word: "薄 / 冥", note: "薄：通「迫」。冥︰昏暗。" },
+        22: { word: "去國", note: "離開京城（國都）。" },
+        23: { word: "蕭然", note: "蕭條冷落的景況。" },
+        24: { word: "景明", note: "陽光燦爛。景︰日光。" },
+        25: { word: "波瀾不驚", note: "風平浪靜。" },
+        26: { word: "翔 / 集", note: "翔：飛翔。集：棲息。" },
+        27: { word: "芷、蘭 /汀", note: "芷、蘭：香草。汀：小洲。" },
+        28: { word: "郁郁 / 青青", note: "郁郁：香氣馥郁。青青：花葉茂盛。" },
+        29: { word: "長煙一空", note: "漫天的雲霧全部消散。" },
+        30: { word: "浮光躍金", note: "月影盪漾，金光閃爍。" },
+        31: { word: "靜影沉璧", note: "月光倒影明靜如白玉，沉於湖中。" },
+        32: { word: "寵辱皆忘", note: "把得寵或受辱都豁出去（忘掉）。" },
+        33: { word: "把 / 臨", note: "把︰持。臨︰對、迎。" },
+        34: { word: "古仁人之心", note: "古代品德高尚、憂國憂民的賢人之心境。" },
+        35: { word: "或 / 異 / 二者之為", note: "或：或許。異：不同。二者之為：指覽物而悲與覽物而喜兩種表現。" },
+        36: { word: "不以物喜，不以己悲", note: "不因外物變化或一己際遇而悲喜。" },
+        37: { word: "居廟堂之高", note: "意謂在朝廷任官。" },
+        38: { word: "江湖", note: "指民間或遠離朝廷的地方。" },
+        39: { word: "先天下之憂而憂", note: "在天下人憂慮之前先憂慮；在天下人快樂之後才快樂。" },
+        40: { word: "微 / 斯人", note: "微︰無、沒有。斯人：這樣的人（古仁人）。" },
+        41: { word: "吾誰與歸", note: "倒裝句：吾與誰歸。歸︰效法。" }
+    };
+
+    const paragraphs = {
+        1: [
+            { text: `<span class="word" onclick="showNote(1)">慶曆四年(1)</span>春，<span class="word" onclick="showNote(2)">滕子京(2)</span><span class="word" onclick="showNote(3)">謫守巴陵郡(3)</span>。`, trans: `慶曆四年的春天，滕子京被貶為巴陵郡太守。` },
+            { text: `<span class="word" onclick="showNote(4)">越明年(4)</span>，<span class="word" onclick="showNote(5)">政通人和(5)</span>，百廢<span class="word" onclick="showNote(6)">具(6)</span>興。`, trans: `到了第二年，政事順利，百姓和樂，各種荒廢的事業都興辦起來了。` },
+            { text: `乃重修岳陽樓，增其舊制，刻<span class="word" onclick="showNote(7)">唐賢、今人(7)</span>詩賦於其上；<span class="word" onclick="showNote(8)">屬(8)</span>予作文以記之。`, trans: `於是重新修建岳陽樓，擴大它原有的規模，把唐代名家和當代人的詩賦刻在上面；並囑咐我寫一篇文章來記述這件事情。` }
+        ],
+        2: [
+            { text: `予觀夫巴陵<span class="word" onclick="showNote(9)">勝狀(9)</span>，在洞庭一湖。`, trans: `我觀看那巴陵郡的美好景色，全在洞庭湖上。` },
+            { text: `<span class="word" onclick="showNote(10)">銜遠山(10)</span>，吞長江，浩浩<span class="word" onclick="showNote(11)">湯湯(11)</span>，橫無際涯；朝暉夕陰，氣象萬千。`, trans: `它連接着遠處的山，吞吐長江的水流，浩浩蕩蕩，無邊無際；早晨陽光燦爛，傍晚暮色沉沉，氣象萬千。` },
+            { text: `此則岳陽樓之<span class="word" onclick="showNote(12)">大觀(12)</span>也，前人之述<span class="word" onclick="showNote(13)">備(13)</span>矣。`, trans: `這就是岳陽樓的雄偉景象，前人的記述已經很詳盡了。` },
+            { text: `然則北通<span class="word" onclick="showNote(14)">巫峽(14)</span>，南極<span class="word" onclick="showNote(15)">瀟湘(15)</span>，<span class="word" onclick="showNote(16)">遷客騷人(16)</span>，多會於此，覽物之情，得無異乎？`, trans: `雖然如此，那麼向北面通到巫峽，向南面直到瀟水和湘水，被貶謫的官吏和文人雅士，大多在這裏聚會，他們觀賞自然景物而觸發的感情，大概會有不同吧？` }
+        ],
+        3: [
+            { text: `若夫<span class="word" onclick="showNote(17)">霪雨霏霏，連月不開(17)</span>；<span class="word" onclick="showNote(18)">陰風怒號(18)</span>，濁浪<span class="word" onclick="showNote(19)">排空(19)</span>；日星隱耀，山岳潛形；商旅不行，<span class="word" onclick="showNote(20)">檣傾楫摧(20)</span>；<span class="word" onclick="showNote(21)">薄暮冥冥(21)</span>，虎嘯猿啼。`, trans: `像那陰雨連綿，接連幾個月不放晴；陰冷的風怒吼，渾濁的波浪沖向天空；日月星辰隱藏起光輝，山岳也隱沒了形體；商人和旅客無法通行，桅杆倒下，船槳折斷；傍晚天色昏暗，只聽到老虎的長嘯和猿猴的悲啼。` },
+            { text: `登斯樓也，則有<span class="word" onclick="showNote(22)">去國(22)</span>懷鄉，憂讒畏譏，滿目<span class="word" onclick="showNote(23)">蕭然(23)</span>，感極而悲者矣。`, trans: `登上這座樓啊，就會有一種離開國都、懷念家鄉，擔心遭到誹謗和譏諷的心情，滿眼全是蕭條冷落的景象，感慨到了極點而十分悲傷。` }
+        ],
+        4: [
+            { text: `至若春和<span class="word" onclick="showNote(24)">景明(24)</span>，<span class="word" onclick="showNote(25)">波瀾不驚(25)</span>，上下天光，一碧萬頃；沙鷗<span class="word" onclick="showNote(26)">翔集(26)</span>，錦鱗游泳；岸<span class="word" onclick="showNote(27)">芷、蘭汀(27)</span>，<span class="word" onclick="showNote(28)">郁郁青青(28)</span>。`, trans: `至於春風和煦，陽光燦爛時，湖面風平浪靜，天色與湖光相接，一片碧綠，廣闊無際；沙洲上的鷗鳥時而飛翔，時而停歇，美麗的魚兒在水中游來游去；岸上的香草和小洲上的蘭花，草木茂盛，青翠欲滴。` },
+            { text: `而或<span class="word" onclick="showNote(29)">長煙一空(29)</span>，皓月千里，<span class="word" onclick="showNote(30)">浮光躍金(30)</span>，<span class="word" onclick="showNote(31)">靜影沉璧(31)</span>；漁歌互答，此樂何極！`, trans: `有時大片的煙霧完全消散，皎潔的月光一瀉千里，水面上閃爍着跳動的金光，月亮靜靜的倒影沉浸在水底，宛如一塊白玉；漁夫的歌聲互相呼應，這種快樂哪有窮盡！` },
+            { text: `登斯樓也，則有心曠神怡，<span class="word" onclick="showNote(32)">寵辱皆忘(32)</span>，<span class="word" onclick="showNote(33)">把酒臨風(33)</span>，其喜洋洋者矣。`, trans: `登上這座樓啊，就會感到胸懷開闊，精神愉快，一切榮辱得失全都忘記，端起酒杯，迎着微風，那真是喜氣洋洋啊。` }
+        ],
+        5: [
+            { text: `嗟夫！予嘗求<span class="word" onclick="showNote(34)">古仁人之心(34)</span>，<span class="word" onclick="showNote(35)">或異二者之為(35)</span>。何哉？`, trans: `唉！我曾經探求過古代品德高尚的人的心境，或許不同於以上兩種人的表現。為甚麼呢？` },
+            { text: `<span class="word" onclick="showNote(36)">不以物喜，不以己悲(36)</span>。`, trans: `他們不因為外物的好壞和自己的得失而或喜或悲。` },
+            { text: `<span class="word" onclick="showNote(37)">居廟堂之高(37)</span>，則憂其民；處<span class="word" onclick="showNote(38)">江湖(38)</span>之遠，則憂其君。`, trans: `在朝廷做官，就為平民百姓擔憂；退處偏遠的江湖，就為君主擔憂。` },
+            { text: `是進亦憂，退亦憂，然則何時而樂耶？`, trans: `這樣進朝廷做官也擔憂，退處江湖也擔憂。既然這樣，那麼甚麼時候才快樂呢？` },
+            { text: `其必曰：「<span class="word" onclick="showNote(39)">先天下之憂而憂，後天下之樂而樂(39)</span>」！`, trans: `他們一定會說：「在天下人擔憂之前先擔憂，在天下人快樂之後才快樂」吧！` },
+            { text: `噫！<span class="word" onclick="showNote(40)">微斯人(40)</span>，<span class="word" onclick="showNote(41)">吾誰與歸(41)</span>！`, trans: `唉！如果沒有這種人，我同誰一道呢！` }
+        ]
+    };
+
+    const allQuestions = [
+        { q: "「滕子京謫守巴陵郡」中的「謫」字意思是甚麼？", options: ["升職", "貶官", "辭官", "調職"], ans: 1 },
+        { q: "「滕子京謫守巴陵郡」中的「守」字意思是甚麼？", options: ["防守", "遵守", "擔任太守", "守護"], ans: 2 },
+        { q: "「越明年」中的「越」字意思是甚麼？", options: ["跨越", "及至、到", "越來越", "超過"], ans: 1 },
+        { q: "「越明年」中的「明年」是指？", options: ["明年今日", "第二年", "光明的年份", "往後幾年"], ans: 1 },
+        { q: "「政通人和」中的「和」字意思是甚麼？", options: ["和平", "和氣", "和樂", "溫和"], ans: 2 },
+        { q: "「百廢具興」中的「具」字相通於哪個字？", options: ["俱 (全部)", "聚 (聚集)", "巨 (巨大)", "具 (工具)"], ans: 0 },
+        { q: "「增其舊制」中的「制」字意思是甚麼？", options: ["制度", "制裁", "規模", "製造"], ans: 2 },
+        { q: "「屬予作文以記之」中的「屬」字意思是甚麼？", options: ["屬於", "囑咐", "家屬", "寫作"], ans: 1 },
+        { q: "「予觀夫巴陵勝狀」中的「勝狀」意思是甚麼？", options: ["勝利的狀態", "奇特的心情", "美景", "險要的地形"], ans: 2 },
+        { q: "「予觀夫巴陵勝狀」中的「勝」字意思是甚麼？", options: ["勝利", "美", "超過", "承受"], ans: 1 },
+        { q: "「銜遠山」中的「銜」字意思是甚麼？", options: ["連接", "像張開口含着", "吞噬", "山頭"], ans: 1 },
+        { q: "「浩浩湯湯」中的「湯湯」形容的是甚麼？", options: ["熱水沸騰", "天氣炎熱", "水勢浩瀚", "路途遙遠"], ans: 2 },
+        { q: "「橫無際涯」中的「際涯」意思是甚麼？", options: ["山崖", "海岸", "邊際", "天涯"], ans: 2 },
+        { q: "「朝暉夕陰」中的「暉」字意思是甚麼？", options: ["光輝", "陽光", "早晨", "陰暗"], ans: 1 },
+        { q: "「此則岳陽樓之大觀也」中的「大觀」意思是甚麼？", options: ["大的道觀", "盛大壯觀的景象", "仔細觀察", "大的景觀"], ans: 1 },
+        { q: "「前人之述備矣」中的「備」字意思是甚麼？", options: ["防備", "準備好", "備份", "完備、詳盡"], ans: 3 },
+        { q: "「然則北通巫峽」中的「然則」意思是甚麼？", options: ["然後", "雖然如此，那麼", "然而", "既然"], ans: 1 },
+        { q: "「南極瀟湘」中的「極」字意思是甚麼？", options: ["南極洲", "極點", "直達", "非常"], ans: 2 },
+        { q: "「遷客騷人」中的「遷客」是指甚麼人？", options: ["搬家的人", "被貶謫的官吏", "旅行的遊客", "流放的犯人"], ans: 1 },
+        { q: "「遷客騷人」中的「騷人」原本代指甚麼？", options: ["發牢騷的人", "流浪漢", "因《離騷》而代指詩人", "地方官員"], ans: 2 },
+        { q: "「覽物之情，得無異乎」中的「得無」意思是甚麼？", options: ["得不到", "難道", "大概、恐怕", "不得不"], ans: 2 },
+        { q: "「若夫霪雨霏霏」中的「霪雨」是指甚麼？", options: ["微雨", "久雨", "雷陣雨", "梅雨"], ans: 1 },
+        { q: "「若夫霪雨霏霏」中的「霏霏」形容甚麼？", options: ["雨聲很大", "雪花飛舞", "雨絲細密", "天氣寒冷"], ans: 2 },
+        { q: "「連月不開」中的「開」字意思是甚麼？", options: ["開門", "放晴", "開始", "打開"], ans: 1 },
+        { q: "「陰風怒號」中的「陰」字意思是甚麼？", options: ["陰冷", "陰天", "背後", "黑暗"], ans: 0 },
+        { q: "「陰風怒號」中的「號」字意思是甚麼？", options: ["號碼", "呼嘯", "哭泣", "信號"], ans: 1 },
+        { q: "「濁浪排空」中的「排空」意思是甚麼？", options: ["排出空氣", "清空障礙", "排隊", "浪濤洶湧，直上雲霄"], ans: 3 },
+        { q: "「日星隱耀」中的「隱耀」意思是甚麼？", options: ["隱藏光輝", "隱形", "閃耀", "星星"], ans: 0 },
+        { q: "「山岳潛形」中的「潛形」意思是甚麼？", options: ["潛水", "變形", "隱沒形體", "山峰"], ans: 2 },
+        { q: "「檣傾楫摧」中的「檣」是指甚麼？", options: ["船艙", "船的桅杆", "船錨", "牆壁"], ans: 1 },
+        { q: "「檣傾楫摧」中的「傾」字意思是甚麼？", options: ["傾訴", "倒下", "傾斜", "傾心"], ans: 1 },
+        { q: "「檣傾楫摧」中的「楫」是指甚麼？", options: ["船槳", "船頭", "船尾", "船帆"], ans: 0 },
+        { q: "「檣傾楫摧」中的「摧」字意思是甚麼？", options: ["摧殘", "催促", "摧毀、折斷", "悲傷"], ans: 2 },
+        { q: "「薄暮冥冥」中的「薄」字意思是甚麼？", options: ["薄弱", "輕薄", "通「迫」，迫近", "微薄"], ans: 2 },
+        { q: "「薄暮冥冥」中的「冥冥」意思是甚麼？", options: ["昏暗、陰沉", "冥界", "冥想", "明明"], ans: 0 },
+        { q: "「則有去國懷鄉」中的「去」字意思是甚麼？", options: ["過去", "前往", "離開", "去掉"], ans: 2 },
+        { q: "「則有去國懷鄉」中的「國」字是指甚麼？", options: ["國家", "京城 / 國都", "外國", "鄉下"], ans: 1 },
+        { q: "「憂讒畏譏」中的「讒」字意思是甚麼？", options: ["嘴饞", "誹謗", "擔心", "小人"], ans: 1 },
+        { q: "「憂讒畏譏」中的「譏」字意思是甚麼？", options: ["飢餓", "機會", "譏諷", "畏懼"], ans: 2 },
+        { q: "「滿目蕭然」中的「蕭然」形容甚麼？", options: ["肅然起敬", "秋風吹拂", "熱鬧繁華", "蕭條冷落的景況"], ans: 3 },
+        { q: "「感極而悲者矣」中的「極」字意思是甚麼？", options: ["極端", "極點", "非常", "極光"], ans: 1 },
+        { q: "「至若春和景明」中的「景」字意思是甚麼？", options: ["背景", "日光", "風景", "景象"], ans: 1 },
+        { q: "「波瀾不驚」中的「驚」字意思是甚麼？", options: ["驚嚇", "驚喜", "起伏、震動", "平靜"], ans: 2 },
+        { q: "「上下天光」中的「天光」意思是甚麼？", options: ["天亮", "天色與湖光相接", "陽光", "天空"], ans: 1 },
+        { q: "「一碧萬頃」中的「萬頃」極言甚麼？", options: ["水面廣闊", "農田很多", "綠色植物", "時間漫長"], ans: 0 },
+        { q: "「沙鷗翔集」中的「翔」字意思是甚麼？", options: ["詳細", "吉祥", "飛翔", "滑翔"], ans: 2 },
+        { q: "「沙鷗翔集」中的「集」字意思是甚麼？", options: ["集合", "集中", "棲息、聚集", "集市"], ans: 2 },
+        { q: "「錦鱗游泳」中的「錦鱗」借代甚麼？", options: ["美麗的魚", "蛇", "龍", "魚鱗"], ans: 0 },
+        { q: "「岸芷汀蘭」中的「芷」字是指甚麼？", options: ["停止", "腳趾", "香草", "白紙"], ans: 2 },
+        { q: "「岸芷汀蘭」中的「汀」字是指甚麼？", options: ["客廳", "小洲、水邊平地", "聽覺", "停下"], ans: 1 },
+        { q: "「郁郁青青」中的「郁郁」形容甚麼？", options: ["心情抑鬱", "香氣馥郁、色彩爛漫", "樹林茂密", "熱鬧"], ans: 1 },
+        { q: "「郁郁青青」中的「青青」形容甚麼？", options: ["年輕", "青色", "花葉茂盛", "青草"], ans: 2 },
+        { q: "「而或長煙一空」中的「或」字意思是甚麼？", options: ["或者", "有時", "或許", "疑惑"], ans: 1 },
+        { q: "「而或長煙一空」中的「長煙」是指甚麼？", options: ["長長的煙囪", "漫天的雲霧", "吸煙", "煙火"], ans: 1 },
+        { q: "「而或長煙一空」中的「一」字意思是甚麼？", options: ["一個", "一樣", "全部", "第一"], ans: 2 },
+        { q: "「而或長煙一空」中的「空」字意思是甚麼？", options: ["天空", "空虛", "有空", "消散"], ans: 3 },
+        { q: "「浮光躍金」中的「浮光」意思是甚麼？", options: ["浮在水面的垃圾", "浮於水面的月影", "浮誇的光彩", "時光"], ans: 1 },
+        { q: "「浮光躍金」中的「躍」字意思是甚麼？", options: ["跳躍", "閃爍、跳動", "喜悅", "超越"], ans: 1 },
+        { q: "「靜影沉璧」中的「影」字意思是甚麼？", options: ["影子", "月影", "影響", "電影"], ans: 1 },
+        { q: "「靜影沉璧」中的「璧」字意思是甚麼？", options: ["牆壁", "無瑕的寶石", "完璧歸趙", "圓形中間有孔的玉器"], ans: 3 },
+        { q: "「此樂何極」中的「極」字意思是甚麼？", options: ["極端", "窮盡", "極好", "兩極"], ans: 1 },
+        { q: "「寵辱皆忘」中的「寵」字意思是甚麼？", options: ["寵物", "寵愛", "得寵", "驕縱"], ans: 2 },
+        { q: "「寵辱皆忘」中的「辱」字意思是甚麼？", options: ["受辱", "辱罵", "侮辱", "榮譽"], ans: 0 },
+        { q: "「寵辱皆忘」中的「皆忘」意思是甚麼？", options: ["都忘記/豁出去", "全部", "忘恩負義", "健忘"], ans: 0 },
+        { q: "「把酒臨風」中的「把」字意思是甚麼？", options: ["把握", "把手", "給予", "持、端起"], ans: 3 },
+        { q: "「把酒臨風」中的「臨」字意思是甚麼？", options: ["降臨", "對、迎", "面臨", "臨時"], ans: 1 },
+        { q: "「予嘗求古仁人之心」中的「嘗」字意思是甚麼？", options: ["品嚐", "嘗試", "曾經", "平常"], ans: 2 },
+        { q: "「予嘗求古仁人之心」中的「求」字意思是甚麼？", options: ["要求", "探求", "求救", "祈求"], ans: 1 },
+        { q: "「古仁人之心」是指甚麼？", options: ["古代人的心臟", "仁慈的心", "古代品德高尚者的心境", "好心人"], ans: 2 },
+        { q: "「或異二者之為」中的「或」字意思是甚麼？", options: ["有人", "有時", "或許", "疑惑"], ans: 2 },
+        { q: "「或異二者之為」中的「為」字意思是甚麼？", options: ["為了", "成為", "表現、行為", "作為"], ans: 2 },
+        { q: "「不以物喜」中的「以」字意思是甚麼？", options: ["以為", "因為", "可以", "用"], ans: 1 },
+        { q: "「居廟堂之高」中的「廟堂」意思是甚麼？", options: ["寺廟", "祠堂", "朝廷", "高堂"], ans: 2 },
+        { q: "「處江湖之遠」中的「江湖」意思是甚麼？", options: ["武林", "民間或遠離朝廷的地方", "長江與湖泊", "江湖騙子"], ans: 1 },
+        { q: "「是進亦憂」中的「是」字意思是甚麼？", options: ["對的", "這樣", "是不是", "是非"], ans: 1 },
+        { q: "「是進亦憂」中的「進」字意思是甚麼？", options: ["進步", "前進", "進入", "進朝廷做官"], ans: 3 },
+        { q: "「退亦憂」中的「退」字意思是甚麼？", options: ["退步", "退休", "退處江湖", "退還"], ans: 2 },
+        { q: "「微斯人」中的「微」字意思是甚麼？", options: ["微小", "無、沒有", "微笑", "稍微"], ans: 1 },
+        { q: "「微斯人」中的「斯人」是指甚麼人？", options: ["死人", "斯文人", "這樣的人(古仁人)", "外國人"], ans: 2 },
+        { q: "「吾誰與歸」中的「歸」字意思是甚麼？", options: ["回家", "歸還", "效法、歸依", "歸宿"], ans: 2 }
+    ];
+
+    let currentQuiz = [];
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function changePara() {
+        const id = document.getElementById('paraSelect').value;
+        const sentences = paragraphs[id] || paragraphs[1];
+        let textHtml = '', transHtml = '';
+        sentences.forEach((s, idx) => {
+            textHtml += `<span class="sent-block" id="orig-${idx}" onmouseover="highlightSent(${idx})" onmouseout="unhighlightSent(${idx})" onclick="toggleLock(${idx})">${s.text}</span> `;
+            transHtml += `<span class="sent-block" id="trans-${idx}" onmouseover="highlightSent(${idx})" onmouseout="unhighlightSent(${idx})" onclick="toggleLock(${idx})">${s.trans}</span> `;
+        });
+        document.getElementById('text-container').innerHTML = textHtml;
+        document.getElementById('trans-container').innerHTML = transHtml;
+        document.getElementById('noteContent').innerHTML = '請點擊上方課文中的<span class="word">藍色底線字詞</span>查看注釋！';
+    }
+
+    function highlightSent(idx) {
+        document.getElementById(`orig-${idx}`).classList.add('highlight');
+        document.getElementById(`trans-${idx}`).classList.add('highlight');
+    }
+
+    function unhighlightSent(idx) {
+        document.getElementById(`orig-${idx}`).classList.remove('highlight');
+        document.getElementById(`trans-${idx}`).classList.remove('highlight');
+    }
+
+    function toggleLock(idx) {
+        const origEl = document.getElementById(`orig-${idx}`);
+        const isLocked = origEl.classList.contains('locked-highlight');
+        document.querySelectorAll('.locked-highlight').forEach(el => el.classList.remove('locked-highlight'));
+        if (!isLocked) {
+            origEl.classList.add('locked-highlight');
+            document.getElementById(`trans-${idx}`).classList.add('locked-highlight');
+        }
+    }
+
+    function showNote(id) {
+        event.stopPropagation();
+        document.getElementById('noteContent').innerHTML = `<strong>【${dict[id].word}】</strong><br>${dict[id].note}`;
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function generateQuiz() {
+        currentQuiz = shuffleArray([...allQuestions]).slice(0, 10);
+        let html = '';
+        currentQuiz.forEach((q, index) => {
+            html += `<div class="quiz-question"><div class="quiz-title">第 ${index + 1} 題：${q.q}</div>`;
+            q.options.forEach((opt, optIndex) => {
+                html += `<label class="quiz-option" id="lbl-q${index}-o${optIndex}">
+                    <input type="radio" name="q${index}" value="${optIndex}"> ${opt}</label>`;
+            });
+            html += `<div class="quiz-feedback" id="feedback-${index}"></div></div>`;
+        });
+        
+        // 重置題庫版面並控制按鈕顯示
+        document.getElementById('quiz-form').innerHTML = html;
+        document.getElementById('quiz-result-banner').style.display = 'none';
+        document.getElementById('btn-submit-quiz').style.display = 'block';
+        document.getElementById('btn-retry-quiz').style.display = 'none';
+        
+        // 將視窗捲動回題庫頂部，方便學生重新開始
+        if (document.getElementById('tab-quiz').classList.contains('active')) {
+             document.getElementById('tab-quiz').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function gradeQuiz() {
+        const name = document.getElementById('stu-name').value.trim();
+        const cls = document.getElementById('stu-class').value.trim();
+        const num = document.getElementById('stu-num').value.trim();
+
+        if (!name || !cls || !num) {
+            alert("老師提提你：請先填寫上方姓名、班別及學號！");
+            return;
+        }
+
+        let score = 0;
+        let allAnswered = true;
+        for (let i = 0; i < currentQuiz.length; i++) {
+            if (!document.querySelector(`input[name="q${i}"]:checked`)) allAnswered = false;
+        }
+        if (!allAnswered) {
+            alert("請完成所有問題才提交答案！");
+            return;
+        }
+
+        for (let i = 0; i < currentQuiz.length; i++) {
+            const selectedVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+            const correctAns = currentQuiz[i].ans;
+            document.querySelectorAll(`input[name="q${i}"]`).forEach(r => r.disabled = true);
+            
+            if (selectedVal === correctAns) {
+                score += 10;
+                document.getElementById(`lbl-q${i}-o${selectedVal}`).classList.add('correct');
+            } else {
+                document.getElementById(`lbl-q${i}-o${selectedVal}`).classList.add('wrong');
+                document.getElementById(`lbl-q${i}-o${correctAns}`).classList.add('correct');
+            }
+        }
+
+        const banner = document.getElementById('quiz-result-banner');
+        banner.style.display = 'block';
+        banner.className = score >= 50 ? 'result-pass' : 'result-fail';
+        banner.innerHTML = `🎓 提交成功！${name} 同學，你的得分是：${score} / ${currentQuiz.length * 10} 分`;
+
+        // 隱藏提交按鈕，顯示重新挑戰按鈕
+        document.getElementById('btn-submit-quiz').style.display = 'none';
+        document.getElementById('btn-retry-quiz').style.display = 'block';
+
+        const scriptURL = ''; 
+        
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('cls', cls);
+        formData.append('num', num);
+        formData.append('score', score);
+
+        fetch(scriptURL, { method: 'POST', body: formData })
+            .then(response => console.log('成績已成功紀錄'))
+            .catch(error => console.error('紀錄失敗!', error.message));
+    }
+
+    window.onload = function() {
+        changePara();
+        generateQuiz();
+    };
+</script>
+</body>
+</html>
